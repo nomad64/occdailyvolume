@@ -20,7 +20,7 @@ def get_volume_csv_month(req_url: str, req_date: date, req_format: str):
         raise(TypeError(f"req_date must be type: date"))
     req_params = {
         "reportDate": req_date.strftime('%Y%m%d'),
-        "format": req_format,
+        "format": req_format.lower(),
         }
     r = requests.get(f"{req_url}?{urlencode(req_params)}")
     # print(f"{req_url}?{urlencode(req_params)}")
