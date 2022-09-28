@@ -35,7 +35,6 @@ def get_volume_csv_month(req_url: str, req_date: date, req_format: str):
         "format": req_format.lower(),
         }
     r = requests.get(f"{req_url}?{urlencode(req_params)}")
-    # print(f"{req_url}?{urlencode(req_params)}")
     r.raise_for_status()
     if "Invalid report Date" in r.text:
         raise(ValueError("given req_date returned invalid response"))
