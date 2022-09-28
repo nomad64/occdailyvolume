@@ -15,7 +15,7 @@ import requests
 import common.logging
 
 
-def get_volume_csv_month(req_url: str, req_date: date, req_format: str):
+def volume_csv_month_get(req_url: str, req_date: date, req_format: str):
     """
     Get volume data from theocc.com for the given month.
 
