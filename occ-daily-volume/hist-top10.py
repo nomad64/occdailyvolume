@@ -16,6 +16,18 @@ import common.logging
 
 
 def get_volume_csv_month(req_url: str, req_date: date, req_format: str):
+    """
+    Get volume data from theocc.com for the given month.
+
+    :param req_url: url for the request
+    :type req_url: str
+    :param req_date: date to request, must include year, month, and day
+    :type req_date: date
+    :param req_format: return format of data (only CSV is supported)
+    :type req_format: str
+    :return: volume data
+    :rtype: str
+    """
     if not isinstance(req_date, date):
         raise(TypeError(f"req_date must be type: date"))
     req_params = {
