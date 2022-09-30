@@ -74,7 +74,13 @@ def volume_df_create(vol_dict: dict) -> pd.DataFrame:
 
 
 def main(args_):
-    print(args_)
+    yaml_conf = common.yaml.yaml_import_config(args_.config)
+    csv_raw = volume_csv_month_get(req_url=yaml_conf['occweb']['daily_volume_url'],
+                                   req_date=date(2021, 12, 1),
+                                   req_format=yaml_conf['occweb']['daily_volume_format'])
+    volume_dict = volume_csv_month_clean_sep(csv_raw)
+    volume_df = volume_df_create(volume_dict)
+    print(volume_df.nlargest(10, "OCC Total"))
 
 
 if __name__ == '__main__':
