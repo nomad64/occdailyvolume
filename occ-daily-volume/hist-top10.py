@@ -46,6 +46,14 @@ def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:
 
 
 def volume_csv_month_clean_sep(csv_data: str) -> dict:
+    """
+    Clean CSV data to be loaded into pandas, splitting out the headers and tables (since we actually get two CSVs from OCC)
+
+    :param csv_data: CSV output from OCC
+    :type csv_data: str
+    :return: cleaned and sorted volume information
+    :rtype: dict
+    """
     csv_clean = []
     volume_dict = {}
     bad_lines = ["YTD", "Avg", "Daily"]
