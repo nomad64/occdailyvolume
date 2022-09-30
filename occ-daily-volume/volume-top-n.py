@@ -15,6 +15,7 @@ import requests
 
 import common.logging
 import common.yaml
+import common.sqlite
 
 
 def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:

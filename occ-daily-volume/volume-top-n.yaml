@@ -1,3 +1,8 @@
+database:
+  sqlite:
+    db_filepath: data/volume-top-n.sqlite
+    db_table: volHist
+
 occweb:
   daily_volume_url: https://marketdata.theocc.com/daily-volume-statistics
   daily_volume_format: csv
