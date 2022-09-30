@@ -110,12 +110,13 @@ def main(args_):
     volume_df = get_volume_by_month_to_df(req_url=yaml_conf['occweb']['daily_volume_url'],
                                         req_date=date(2021, 12, 1),
                                         req_format=yaml_conf['occweb']['daily_volume_format'])
-    print(volume_df.nlargest(10, "OCC Total"))
+    print(volume_df.nlargest(args_.number, "OCC Total"))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate a high volume days list')
     parser.add_argument("-C", "--config", metavar="filename", type=str, default=f"{os.path.splitext(os.path.basename(__file__))[0]}.yaml", help="Specify a config file to use.")
+    parser.add_argument("-n", "--number", metavar="n", type=int, default=10)
     # mode = parser.add_subparsers(title='actions', help='Select at least one action for helper to perform', required=True)
     # test1 = mode.add_parser('test1', help='test1 help')
     # test2 = mode.add_parser('test2', help='test1 help')
