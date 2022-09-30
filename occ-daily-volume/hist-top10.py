@@ -86,13 +86,30 @@ def volume_df_create(vol_dict: dict, merge_df: pd.DataFrame=None) -> pd.DataFram
     return vol_df
 
 
-def main(args_):
-    yaml_conf = common.yaml.yaml_import_config(args_.config)
-    csv_raw = volume_csv_month_get(req_url=yaml_conf['occweb']['daily_volume_url'],
-                                   req_date=date(2021, 12, 1),
-                                   req_format=yaml_conf['occweb']['daily_volume_format'])
+def get_volume_by_month_to_df(req_url: str, req_date: date, req_format: str):
+    """
+    Helper function to get monthly volume into dataframe.
+
+    :param req_url: url for the request
+    :type req_url: str
+    :param req_date: date to request, must include year, month, and day
+    :type req_date: date
+    :param req_format: return format of data (only CSV is supported)
+    :type req_format: str
+    :return: volume data
+    :rtype: str
+    """
+    csv_raw = volume_csv_month_get(req_url=req_url, req_date=req_date, req_format=req_format)
     volume_dict = volume_csv_month_clean_sep(csv_raw)
     volume_df = volume_df_create(volume_dict)
+    return volume_df
+
+
+def main(args_):
+    yaml_conf = common.yaml.yaml_import_config(args_.config)
+    volume_df = get_volume_by_month_to_df(req_url=yaml_conf['occweb']['daily_volume_url'],
+                                        req_date=date(2021, 12, 1),
+                                        req_format=yaml_conf['occweb']['daily_volume_format'])
     print(volume_df.nlargest(10, "OCC Total"))
 
 
