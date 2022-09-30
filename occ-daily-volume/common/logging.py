@@ -23,7 +23,7 @@ def setup_logging(name_):
                   },
               'handlers': {
                   'console': {
-                      'level': 'DEBUG',
+                      'level': 'WARNING',
                       'class': 'logging.StreamHandler',
                       'formatter': 'syslog-standard',
                       'stream': 'ext://sys.stdout'
