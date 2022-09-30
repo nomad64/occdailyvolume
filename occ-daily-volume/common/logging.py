@@ -46,3 +46,7 @@ def setup_logging(name_):
     logging.config.dictConfig(CONFIG)
     logging.info('logging initialized successfully.')
     return log_file_name
+
+
+if __name__ == '__main__':
+    print("This file cannot be run directly.")
