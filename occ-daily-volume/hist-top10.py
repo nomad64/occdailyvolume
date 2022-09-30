@@ -40,6 +40,8 @@ def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:
     r.raise_for_status()
     if "Invalid report Date" in r.text:
         raise(ValueError("given req_date returned invalid response"))
+    if "Report is not available" in r.text:
+        raise(ValueError("given req_date is not publically available"))
     return r.text
 
 
