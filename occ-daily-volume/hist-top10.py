@@ -62,14 +62,15 @@ def volume_csv_month_clean_sep(csv_data: str) -> dict:
     return volume_dict
 
 
-def volume_df_create(vol_dict: dict) -> df:
+def volume_df_create(vol_dict: dict) -> pd.DataFrame:
     """
     Create dataframe from cleaned CSV dict.
 
     :param vol_dict: output from volume_csv_month_clean_sep
     :type vol_dict: dict
     """
-    vol_df = pd.read_csv(io.StringIO(csv_dict['contracts']), thousands=",", index_col="Date")
+    vol_df = pd.read_csv(io.StringIO(vol_dict['contracts']), thousands=",", index_col="Date")
+    return vol_df
 
 
 def main(args_):
