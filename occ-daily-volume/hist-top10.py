@@ -4,6 +4,7 @@ Build Top 10 list from daily volume
 
 import argparse
 import os
+import io
 import sqlite3 as sql
 from datetime import date
 from datetime import datetime
@@ -13,6 +14,7 @@ import pandas as pd
 import requests
 
 import common.logging
+import common.yaml
 
 
 def volume_csv_month_get(req_url: str, req_date: date, req_format: str):
@@ -58,6 +60,16 @@ def volume_csv_month_clean_sep(csv_data):
         "futures_headers": csv_split[1].split("\n")[1].split(","),
     }
     return volume_dict
+
+
+def volume_df_create(vol_dict):
+    """
+    Create dataframe from cleaned CSV dict.
+
+    :param vol_dict: output from volume_csv_month_clean_sep
+    :type vol_dict: dict
+    """
+    vol_df = pd.read_csv(io.StringIO(csv_dict['contracts']), thousands=",", index_col="Date")
 
 
 def main(args_):
