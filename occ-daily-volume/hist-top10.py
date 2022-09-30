@@ -64,14 +64,17 @@ def volume_csv_month_clean_sep(csv_data: str) -> dict:
     return volume_dict
 
 
-def volume_df_create(vol_dict: dict) -> pd.DataFrame:
+def volume_df_create(vol_dict: dict, merge_df: pd.DataFrame=None) -> pd.DataFrame:
     """
-    Create dataframe from cleaned CSV dict.
+    Create dataframe from cleaned CSV dict. Optionally merge the data into one dataframe.
 
     :param vol_dict: output from volume_csv_month_clean_sep
     :type vol_dict: dict
     """
     vol_df = pd.read_csv(io.StringIO(vol_dict['contracts']), thousands=",", index_col="Date")
+    if merge_df:
+        output_df = pd.concat([vol_df, merge_df])
+        return merge_df
     return vol_df
 
 
