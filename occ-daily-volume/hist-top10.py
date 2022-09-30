@@ -17,7 +17,7 @@ import common.logging
 import common.yaml
 
 
-def volume_csv_month_get(req_url: str, req_date: date, req_format: str):
+def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:
     """
     Get volume data from theocc.com for the given month.
 
@@ -43,7 +43,7 @@ def volume_csv_month_get(req_url: str, req_date: date, req_format: str):
     return r.text
 
 
-def volume_csv_month_clean_sep(csv_data):
+def volume_csv_month_clean_sep(csv_data: str) -> dict:
     csv_clean = []
     volume_dict = {}
     bad_lines = ["YTD", "Avg", "Daily"]
@@ -62,7 +62,7 @@ def volume_csv_month_clean_sep(csv_data):
     return volume_dict
 
 
-def volume_df_create(vol_dict):
+def volume_df_create(vol_dict: dict) -> df:
     """
     Create dataframe from cleaned CSV dict.
 
