@@ -3,19 +3,18 @@ Build Top 10 list from daily volume
 """
 
 import argparse
-import os
 import io
-import sqlite3 as sql
-from datetime import date
-from datetime import datetime
+import logging
+import os
+from datetime import date, datetime
 from urllib.parse import urlencode
 
 import pandas as pd
 import requests
 
 import common.logging
-import common.yaml
 import common.sqlite
+import common.yaml
 
 
 def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:
@@ -123,5 +122,6 @@ if __name__ == '__main__':
     # test2 = mode.add_parser('test2', help='test1 help')
     args = parser.parse_args()
     common.logging.setup_logging(os.path.splitext(os.path.basename(__file__))[0])
+    logging = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
     main(args)
     

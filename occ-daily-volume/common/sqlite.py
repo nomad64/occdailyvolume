@@ -1,4 +1,8 @@
+import logging
 import sqlite3 as sql
+
+import pandas as pd
+
 
 def db_write_df_to_sql(db_filepath: str, db_table: str, df_: pd.DataFrame):
     """
@@ -31,8 +35,11 @@ def db_read_sql_to_df(db_filepath: str, db_table: str) -> pd.DataFrame:
     """
     logger = logging.getLogger(__name__)
     conn = sql.connect(db_filepath)
-    logger.debug(f"")
-    pd.read_sql_query("SELECT * from volHist", conn)
+    logger.debug(f"Attemping to read DB {db_table} from file {db_filepath}")
+    out_df = pd.read_sql_query(f"SELECT * from {db_table}", conn, index_col="Date", parse_dates=["Date"])
+    logger.debug(f"Successfully read {len(out_df)} rows")
+    return out_df
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print("This file cannot be run directly.")

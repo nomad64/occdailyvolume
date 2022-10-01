@@ -44,7 +44,8 @@ def setup_logging(name_):
                   }
               }
     logging.config.dictConfig(CONFIG)
-    logging.info('logging initialized successfully.')
+    logger = logging.getLogger(__name__)
+    logger.info('logging initialized successfully.')
     return log_file_name
 
 
