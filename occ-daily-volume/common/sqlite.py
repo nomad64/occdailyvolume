@@ -39,7 +39,12 @@ def db_read_sql_to_df(db_filepath: str, db_table: str) -> pd.DataFrame:
     if Path(db_filepath).is_file():
         conn = sql.connect(db_filepath)
         logger.debug(f"Attemping to read DB {db_table} from file {db_filepath}")
-        out_df = pd.read_sql_query(f"SELECT * from {db_table}", conn, index_col="Date", parse_dates={"Date": "%Y-%m-%d"})
+        out_df = pd.read_sql_query(
+            f"SELECT * from {db_table}",
+            conn,
+            index_col="Date",
+            parse_dates={"Date": "%Y-%m-%d"},
+        )
         logger.debug(f"Successfully read {len(out_df)} rows")
     else:
         logger.warning(f"Unable to find {db_filepath}, returning empty dataframe")

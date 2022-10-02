@@ -19,7 +19,7 @@ def yaml_import_config(yaml_file):
     except FileNotFoundError:
         logger.exception(f"Unable to find config file: {yaml_file}")
     return yaml_conf
-    
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print("This file cannot be run directly.")
