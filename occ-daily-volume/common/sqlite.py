@@ -43,7 +43,7 @@ def db_read_sql_to_df(db_filepath: str, db_table: str) -> pd.DataFrame:
             f"SELECT * from {db_table}",
             conn,
             index_col="Date",
-            parse_dates={"Date": "%Y-%m-%d"},
+            parse_dates=['Date'],
         )
         logger.debug(f"Successfully read {len(out_df)} rows")
     else:
