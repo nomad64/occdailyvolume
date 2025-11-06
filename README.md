@@ -1,5 +1,11 @@
 # occ-daily-volume
 
+[![Code Coverage](https://img.shields.io/badge/Coverage-TBD-lightgrey.svg)](https://shields.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
+[![GitHub stars](https://img.shields.io/github/stars/nomad64/occdailyvolume.svg?style=social&label=Star&maxAge=2592000)](https://github.com/nomad64/occdailyvolume/stargazers/)
+[![GitHub forks](https://img.shields.io/github/forks/nomad64/occdailyvolume.svg?style=social&label=Fork&maxAge=2592000)](https://github.com/nomad64/occdailyvolume/network/)
+
 ## Project Overview
 
 This project is a Python-based data pipeline that downloads, processes, and stores daily financial volume data from the Options Clearing Corporation (OCC). It is designed to be run from the command line.
