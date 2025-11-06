@@ -57,13 +57,39 @@ def volume_csv_month_clean_sep(csv_data: str) -> dict:
     """
     csv_clean = []
     volume_dict = {}
-    bad_lines = ["YTD", "Avg", "Daily"]
+    bad_lines = ["YTD", "Avg"]
     csv_data = csv_data.replace(",\r\n", "\r\n")
     csv_list = csv_data.split("\r\n")
-    report_date = datetime.strptime(csv_list[5].split(",")[0], "%m/%d/%Y").date()
+    report_date = datetime.strptime(csv_list[1].split(": ")[1].split(",")[0], "%m/%d/%Y").date()
     # Append the month short name to bad_lines
     bad_lines.append(report_date.strftime("%b"))
-    csv_clean = [i for i in csv_list if not any(b in i for b in bad_lines)]
+    # Filter out lines that are not part of the actual data tables or are summary rows
+    # Keep the main headers and data rows, remove empty lines and summary lines
+    filtered_lines = []
+    in_contracts_section = False
+    in_futures_section = False
+
+    for line in csv_list:
+        if "Daily Volume by Exchange" in line:
+            in_contracts_section = True
+            in_futures_section = False
+            continue
+        if "Futures and Options on Futures" in line:
+            in_contracts_section = False
+            in_futures_section = True
+            filtered_lines.append('') # Add a blank line to act as a separator for csv_split
+            continue
+
+        if in_contracts_section or in_futures_section:
+            if line.strip() == '' or line.strip() == ',,,': # Remove empty lines or lines with just commas
+                continue
+            if any(b in line for b in bad_lines): # Remove summary lines
+                continue
+            if "Report Date" in line: # Remove report date line
+                continue
+            filtered_lines.append(line)
+
+    csv_clean = filtered_lines
     csv_split = "\n".join(csv_clean).split("\n\n")
     volume_dict = {
         "contracts": csv_split[0],
