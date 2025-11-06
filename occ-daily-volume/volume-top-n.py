@@ -6,7 +6,7 @@ import argparse
 import io
 import logging
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from urllib.parse import urlencode, urljoin
 
 import pandas as pd
@@ -32,7 +32,7 @@ def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:
     :rtype: str
     """
     if not isinstance(req_date, date):
-        raise (TypeError(f"req_date must be type: date"))
+        raise (TypeError("req_date must be type: date"))
     req_date += relativedelta(day=1)
     req_params = {
         "reportDate": req_date.strftime("%Y%m%d"),
@@ -94,8 +94,7 @@ def volume_df_create(vol_dict: dict, merge_df: pd.DataFrame = None) -> pd.DataFr
         parse_dates=["Date"],
     )
     if merge_df:
-        output_df = pd.concat([vol_df, merge_df])
-        return merge_df
+        return pd.concat([vol_df, merge_df])
     return vol_df
 
 

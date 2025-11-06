@@ -3,7 +3,6 @@ import sqlite3 as sql
 from pathlib import Path
 
 import pandas as pd
-from pandas.io.sql import DatabaseError
 
 
 def db_write_df_to_sql(db_filepath: str, db_table: str, df_to_write: pd.DataFrame):
@@ -43,7 +42,7 @@ def db_read_sql_to_df(db_filepath: str, db_table: str) -> pd.DataFrame:
             f"SELECT * from {db_table}",
             conn,
             index_col="Date",
-            parse_dates=['Date'],
+            parse_dates=["Date"],
         )
         logger.debug(f"Successfully read {len(out_df)} rows")
     else:
