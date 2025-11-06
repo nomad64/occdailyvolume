@@ -3,120 +3,17 @@ Build Top 10 list from daily volume
 """
 
 import argparse
-import io
 import logging
 import os
-from datetime import date, datetime
-from urllib.parse import urlencode, urljoin
+from datetime import date
 
-import pandas as pd
-import requests
 from dateutil.relativedelta import relativedelta
 
+import common.dataframe
 import common.logging
+import common.occ
 import common.sqlite
 import common.yaml
-
-
-def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:
-    """
-    Get volume data from theocc.com for the given month.
-
-    :param req_url: url for the request
-    :type req_url: str
-    :param req_date: date to request, must include year, month, and day
-    :type req_date: date
-    :param req_format: return format of data (only CSV is supported)
-    :type req_format: str
-    :return: volume data
-    :rtype: str
-    """
-    if not isinstance(req_date, date):
-        raise (TypeError("req_date must be type: date"))
-    req_date += relativedelta(day=1)
-    req_params = {
-        "reportDate": req_date.strftime("%Y%m%d"),
-        "format": req_format.lower(),
-    }
-    baseurl = urljoin(req_url, "/")
-    logger.debug(
-        f"Retrieving monthly volume report for {req_date.strftime('%B %Y')} from {baseurl}"
-    )
-    r = requests.get(f"{req_url}?{urlencode(req_params)}")
-    r.raise_for_status()
-    if "Invalid report Date" in r.text:
-        raise (ValueError("given req_date returned invalid response"))
-    if "Report is not available" in r.text:
-        raise (ValueError("given req_date is not publically available"))
-    return r.text
-
-
-def volume_csv_month_clean_sep(csv_data: str) -> dict:
-    """
-    Clean CSV data to be loaded into pandas, splitting out the headers and tables (since we actually get two CSVs from OCC)
-
-    :param csv_data: CSV output from OCC
-    :type csv_data: str
-    :return: cleaned and sorted volume information
-    :rtype: dict
-    """
-    csv_clean = []
-    volume_dict = {}
-    bad_lines = ["YTD", "Avg", "Daily"]
-    csv_data = csv_data.replace(",\r\n", "\r\n")
-    csv_list = csv_data.split("\r\n")
-    report_date = datetime.strptime(csv_list[5].split(",")[0], "%m/%d/%Y").date()
-    # Append the month short name to bad_lines
-    bad_lines.append(report_date.strftime("%b"))
-    csv_clean = [i for i in csv_list if not any(b in i for b in bad_lines)]
-    csv_split = "\n".join(csv_clean).split("\n\n")
-    volume_dict = {
-        "contracts": csv_split[0],
-        "contracts_headers": csv_split[0].split("\n")[0].split(","),
-        "futures": csv_split[1],
-        "futures_headers": csv_split[1].split("\n")[1].split(","),
-    }
-    logger.debug(f"Successfully cleaned data for {report_date.strftime('%B %Y')}")
-    return volume_dict
-
-
-def volume_df_create(vol_dict: dict, merge_df: pd.DataFrame = None) -> pd.DataFrame:
-    """
-    Create dataframe from cleaned CSV dict. Optionally merge the data into one dataframe.
-
-    :param vol_dict: output from volume_csv_month_clean_sep
-    :type vol_dict: dict
-    """
-    vol_df = pd.read_csv(
-        io.StringIO(vol_dict["contracts"]),
-        thousands=",",
-        index_col="Date",
-        parse_dates=["Date"],
-    )
-    if merge_df:
-        return pd.concat([vol_df, merge_df])
-    return vol_df
-
-
-def get_volume_by_month_to_df(req_url: str, req_date: date, req_format: str):
-    """
-    Helper function to get monthly volume into dataframe.
-
-    :param req_url: url for the request
-    :type req_url: str
-    :param req_date: date to request, must include year, month, and day
-    :type req_date: date
-    :param req_format: return format of data (only CSV is supported)
-    :type req_format: str
-    :return: volume data
-    :rtype: str
-    """
-    csv_raw = volume_csv_month_get(
-        req_url=req_url, req_date=req_date, req_format=req_format
-    )
-    volume_dict = volume_csv_month_clean_sep(csv_raw)
-    volume_df = volume_df_create(volume_dict)
-    return volume_df
 
 
 def backfill_db_to_previous_month(
@@ -150,7 +47,7 @@ def backfill_db_to_previous_month(
             logger.debug(
                 f"DB {db_filepath} appears to be empty, fetching {prev_month.strftime('%B %Y')}"
             )
-            month_df = get_volume_by_month_to_df(
+            month_df = common.occ.get_volume_by_month_to_df(
                 req_url=req_url, req_date=prev_month, req_format=req_format
             )
             common.sqlite.db_write_df_to_sql(
@@ -168,7 +65,7 @@ def backfill_db_to_previous_month(
         working_month += relativedelta(day=1)
         while working_month > backfill_end_date:
             try:
-                month_df = get_volume_by_month_to_df(
+                month_df = common.occ.get_volume_by_month_to_df(
                     req_url=req_url, req_date=working_month, req_format=req_format
                 )
                 common.sqlite.db_write_df_to_sql(
@@ -200,7 +97,7 @@ def backfill_db_to_previous_month(
             working_month = db_df_max_date + relativedelta(months=1)
             working_month += relativedelta(day=1)
             while working_month <= prev_month:
-                month_df = get_volume_by_month_to_df(
+                month_df = common.occ.get_volume_by_month_to_df(
                     req_url=req_url, req_date=working_month, req_format=req_format
                 )
                 common.sqlite.db_write_df_to_sql(
@@ -231,7 +128,7 @@ def main(args_):
         db_filepath=database_filepath,
         db_table=yaml_conf["database"]["sqlite"]["db_table"],
     )
-    print(volume_df.nlargest(args_.number, "OCC Total"))
+    common.dataframe.pretty_print_df(volume_df.nlargest(args_.number, "OCC Total"))
 
 
 if __name__ == "__main__":
