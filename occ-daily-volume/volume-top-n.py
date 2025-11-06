@@ -19,11 +19,16 @@ import common.yaml
 
 
 def main(args_):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    if not os.path.isabs(args_.config):
+        args_.config = os.path.join(script_dir, args_.config)
     yaml_conf = common.yaml.yaml_import_config(args_.config)
     if args_.database:
         database_filepath = args_.database
     else:
         database_filepath = yaml_conf["database"]["sqlite"]["db_filepath"]
+    if not os.path.isabs(database_filepath):
+        database_filepath = os.path.join(script_dir, database_filepath)
     if args_.update:
         common.updater.backfill_db_to_previous_month(
             req_url=yaml_conf["occweb"]["daily_volume_url"],
