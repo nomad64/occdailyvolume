@@ -69,7 +69,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Update local database before analysis",
     )
+    parser.add_argument(
+        "-l",
+        "--log-level",
+        metavar="LEVEL",
+        type=str,
+        default="WARNING",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+    )
     args = parser.parse_args()
-    common.logging.setup_logging(os.path.splitext(os.path.basename(__file__))[0])
+    common.logging.setup_logging(os.path.splitext(os.path.basename(__file__))[0], args.log_level)
     logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
     main(args)
