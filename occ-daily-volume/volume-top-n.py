@@ -1,5 +1,10 @@
 """
-Build Top 10 list from daily volume
+Main script for the OCC Daily Volume data pipeline.
+
+This script serves as the command-line interface to fetch, update, and display
+the top N daily volume statistics from the Options Clearing Corporation (OCC).
+
+Project available on GitHub: https://github.com/nomad64/occdailyvolume
 """
 
 import argparse
