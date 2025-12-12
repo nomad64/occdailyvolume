@@ -12,6 +12,9 @@ from dateutil.relativedelta import relativedelta
 
 logger = logging.getLogger(__name__)
 
+# HTTP request timeout in seconds
+REQUEST_TIMEOUT = 30
+
 
 def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:
     """
@@ -27,7 +30,7 @@ def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:
     :rtype: str
     """
     if not isinstance(req_date, date):
-        raise (TypeError("req_date must be type: date"))
+        raise TypeError("req_date must be type: date")
     req_date += relativedelta(day=1)
     req_params = {
         "reportDate": req_date.strftime("%Y%m%d"),
@@ -37,12 +40,18 @@ def volume_csv_month_get(req_url: str, req_date: date, req_format: str) -> str:
     logger.debug(
         f"Retrieving monthly volume report for {req_date.strftime('%B %Y')}" f" from {baseurl}"
     )
-    r = requests.get(f"{req_url}?{urlencode(req_params)}")
-    r.raise_for_status()
+    try:
+        r = requests.get(f"{req_url}?{urlencode(req_params)}", timeout=REQUEST_TIMEOUT)
+        r.raise_for_status()
+    except requests.exceptions.Timeout:
+        raise TimeoutError(f"Request timed out after {REQUEST_TIMEOUT} seconds")
+    except requests.exceptions.RequestException as e:
+        raise ConnectionError(f"Failed to fetch data from {baseurl}: {e}")
+
     if "Invalid report Date" in r.text:
-        raise (ValueError("given req_date returned invalid response"))
+        raise ValueError("given req_date returned invalid response")
     if "Report is not available" in r.text:
-        raise (ValueError("given req_date is not publically available"))
+        raise ValueError("given req_date is not publically available")
     return r.text
 
 

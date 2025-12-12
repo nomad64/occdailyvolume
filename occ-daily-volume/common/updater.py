@@ -68,9 +68,13 @@ def backfill_db_to_previous_month(
                 common.sqlite.db_write_df_to_sql(
                     db_filepath=db_filepath, db_table=db_table, df_to_write=month_df
                 )
-            except ValueError:
+            except ValueError as e:
                 logger.warning(
-                    f"Data unavailable for {working_month.strftime('%B %Y')}, skipping"
+                    f"Data unavailable for {working_month.strftime('%B %Y')}, skipping: {e}"
+                )
+            except (TimeoutError, ConnectionError) as e:
+                logger.error(
+                    f"Network error for {working_month.strftime('%B %Y')}, skipping: {e}"
                 )
             working_month -= relativedelta(months=1)
         logger.debug(
@@ -94,12 +98,21 @@ def backfill_db_to_previous_month(
             working_month = db_df_max_date + relativedelta(months=1)
             working_month += relativedelta(day=1)
             while working_month <= prev_month:
-                month_df = common.occ.get_volume_by_month_to_df(
-                    req_url=req_url, req_date=working_month, req_format=req_format
-                )
-                common.sqlite.db_write_df_to_sql(
-                    db_filepath=db_filepath, db_table=db_table, df_to_write=month_df
-                )
+                try:
+                    month_df = common.occ.get_volume_by_month_to_df(
+                        req_url=req_url, req_date=working_month, req_format=req_format
+                    )
+                    common.sqlite.db_write_df_to_sql(
+                        db_filepath=db_filepath, db_table=db_table, df_to_write=month_df
+                    )
+                except ValueError as e:
+                    logger.warning(
+                        f"Data unavailable for {working_month.strftime('%B %Y')}, skipping: {e}"
+                    )
+                except (TimeoutError, ConnectionError) as e:
+                    logger.error(
+                        f"Network error for {working_month.strftime('%B %Y')}, skipping: {e}"
+                    )
                 working_month += relativedelta(months=1)
             logger.debug(f"DB filled up to {prev_month.strftime('%B %Y')}")
         else:
