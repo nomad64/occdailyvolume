@@ -68,4 +68,4 @@ The script uses the `volume-top-n.yaml` file for configuration, including the da
 
 ## AI Assistance
 
-Portions of this project were developed with the assistance of Google's Gemini. Human oversight was used to review and integrate the AI-generated code.
+Portions of this project were developed with the assistance of Google's Gemini and Anthropic's Claude. Human oversight was used to review and integrate the AI-generated code.
