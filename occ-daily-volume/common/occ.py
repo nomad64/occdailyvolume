@@ -69,7 +69,17 @@ def volume_csv_month_clean_sep(csv_data: str) -> dict:
     bad_lines = ["YTD", "Avg"]
     csv_data = csv_data.replace(",\r\n", "\r\n")
     csv_list = csv_data.split("\r\n")
-    report_date = datetime.strptime(csv_list[1].split(": ")[1].split(",")[0], "%m/%d/%Y").date()
+
+    # Check for new format header
+    if "Daily OCC Contract Volume" in csv_list[0]:
+        date_str = csv_list[0].split("-")[-1].strip()
+        report_date = datetime.strptime(date_str, "%B %Y").date()
+    else:
+        try:
+            report_date = datetime.strptime(csv_list[1].split(": ")[1].split(",")[0], "%m/%d/%Y").date()
+        except (IndexError, ValueError):
+            raise ValueError("Could not parse Report Date from CSV")
+
     # Append the month short name to bad_lines
     bad_lines.append(report_date.strftime("%b"))
     # Filter out lines that are not part of the actual data tables or are summary rows
@@ -79,18 +89,18 @@ def volume_csv_month_clean_sep(csv_data: str) -> dict:
     in_futures_section = False
 
     for line in csv_list:
-        if "Daily Volume by Exchange" in line:
+        if "Daily Volume by Exchange" in line or "Daily OCC Contract Volume" in line:
             in_contracts_section = True
             in_futures_section = False
             continue
-        if "Futures and Options on Futures" in line:
+        if "Futures and Options on Futures" in line or "Daily Futures Contract Volume" in line:
             in_contracts_section = False
             in_futures_section = True
             filtered_lines.append('') # Add a blank line to act as a separator for csv_split
             continue
 
         if in_contracts_section or in_futures_section:
-            if line.strip() == '' or line.strip() == ',,,': # Remove empty lines or lines with just commas
+            if line.strip() == '' or line.strip() == ',,,' or line.strip() == ',': # Remove empty lines or lines with just commas
                 continue
             if any(b in line for b in bad_lines): # Remove summary lines
                 continue
