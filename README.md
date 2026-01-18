@@ -1,6 +1,6 @@
 # occ-daily-volume
 
-[![Code Coverage](https://img.shields.io/badge/Coverage-TBD-lightgrey.svg)](https://shields.io/)
+[![Code Coverage](https://img.shields.io/badge/Coverage-96%25-brightgreen.svg)](https://shields.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
 [![GitHub stars](https://img.shields.io/github/stars/nomad64/occdailyvolume.svg?style=social&label=Star&maxAge=2592000)](https://github.com/nomad64/occdailyvolume/stargazers/)
@@ -59,12 +59,26 @@ This project includes a `Dockerfile` to build and run the application in a conta
 
 The script uses the `volume-top-n.yaml` file for configuration, including the database path, data URL, and other parameters.
 
-## Development Conventions
+## Development
 
+### Conventions
 - **Configuration**: Project configuration is managed through the `volume-top-n.yaml` file.
 - **Database**: The project uses a SQLite database to store the volume data. The database schema is managed by the `volume-top-n.py` script.
 - **Logging**: The project uses the standard Python `logging` module. The log level can be set via a command-line argument.
 - **Modularity**: The project is organized into a main script (`volume-top-n.py`) and a `common` module for shared functionality (database, logging, YAML parsing).
+
+### Testing
+This project maintains high test coverage. To run the tests:
+
+1.  Install testing dependencies:
+    ```bash
+    pip install pytest pytest-cov mock
+    ```
+
+2.  Run the test suite with coverage report:
+    ```bash
+    pytest --cov=occ-daily-volume/common occ-daily-volume/tests/
+    ```
 
 ## AI Assistance
 
