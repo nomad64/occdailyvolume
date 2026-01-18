@@ -133,7 +133,7 @@ def volume_df_create(vol_dict: dict, merge_df: pd.DataFrame = None) -> pd.DataFr
         index_col="Date",
         parse_dates=["Date"],
     )
-    if merge_df:
+    if merge_df is not None:
         return pd.concat([vol_df, merge_df])
     return vol_df
 
