@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# AI agent Context files
+GEMINI.md
+CLAUDE.md
