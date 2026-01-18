@@ -1,59 +1,91 @@
 ## Project Overview
 
-This project is a Python-based data pipeline that downloads, processes, and stores daily financial volume data from the Options Clearing Corporation (OCC). It is designed to be run from the command line.
+`occdailyvolume` is a Python-based CLI tool and data pipeline that aggregates daily financial volume data from the [Options Clearing Corporation (OCC)](https://theocc.com). It fetches historical and ongoing data, stores it in a local SQLite database, and allows querying for high-volume days.
 
-The pipeline fetches monthly data in CSV format from `theocc.com`, cleans it, and stores it in a local SQLite database. The script can backfill historical data and keep the database updated with the latest available monthly data.
+## Technical Architecture
 
-The main technologies used are:
-- Python 3
-- Pandas for data manipulation
-- Requests for fetching data from the web
-- PyYAML for configuration
-- Argparse for command-line argument parsing
-- SQLite for the local database
+The project is structured as a Python package with a main entry point and a shared library module.
 
-## Building and Running
+### Core Components
 
-### Prerequisites
+-   **`volume-top-n.py`**: The CLI entry point. Handles argument parsing, configuration loading, and orchestration of the update/query workflows.
+-   **`common/`**: A package containing the core logic:
+    -   `occ.py`: Handles HTTP requests to OCC, parses the raw CSV responses, and cleans the data (removing summary rows like "YTD", "Avg").
+    -   `updater.py`: Implements the synchronization logic. It creates a local `volume-top-n.sqlite` database and backfills data month-by-month from the current date back to January 2008. It also handles forward-filling if the database is outdated.
+    -   `sqlite.py`: Manages SQLite connections and DataFrame I/O.
+    -   `dataframe.py`: Utilities for formatting and printing Pandas DataFrames (uses `tabulate`).
+    -   `yaml.py`: Configuration loader.
 
-- Python 3
-- Pip
+### Dependencies
 
-### Installation
+-   **Runtime**: `python-3`
+-   **Data Analysis**: `pandas`
+-   **HTTP Client**: `requests`
+-   **Configuration**: `pyyaml`
+-   **Utilities**: `python-dateutil`, `argparse`, `tabulate`
 
-1.  Install the required Python packages:
+## Configuration
+
+Configuration is managed via `occ-daily-volume/volume-top-n.yaml`.
+
+```yaml
+database:
+  sqlite:
+    db_filepath: data/volume-top-n.sqlite  # Path to the SQLite DB
+    db_table: volHist                      # Table name for volume data
+
+occweb:
+  daily_volume_url: https://marketdata.theocc.com/daily-volume-statistics
+  daily_volume_format: csv
+```
+
+## Data Pipeline
+
+1.  **Ingestion**: The tool requests monthly volume reports from OCC.
+2.  **Cleaning**: Raw CSV data is split (contracts vs. futures), and summary lines (e.g., "Oct Total", "YTD Total") are programmatically removed to ensure only daily records remain.
+3.  **Storage**: Cleaned data is appended to the SQLite `volHist` table.
+    -   **Schema**: `Date` (Index), `Equity`, `Index/Others`, `Debt`, `Futures`, `OCC Total`.
+4.  **Querying**: The tool reads the database into a Pandas DataFrame to perform aggregations and sorting (e.g., finding top N volume days).
+
+## Usage
+
+### Local CLI
+
+1.  **Install dependencies**:
     ```bash
     pip install -r occ-daily-volume/requirements.txt
     ```
+2.  **Run the tool**:
+    ```bash
+    # Update database and show top 10 days
+    python occ-daily-volume/volume-top-n.py --update --number 10
+    ```
 
-### Running the script
+### Docker
 
-The main script is `volume-top-n.py`. It can be run from the command line.
+The project includes a `Dockerfile` for containerized execution.
 
 ```bash
-python occ-daily-volume/volume-top-n.py --config occ-daily-volume/volume-top-n.yaml --log-level INFO
+# Build
+docker build -t occ-daily-volume .
+
+# Run (mounting a local volume for persistence)
+docker run -v $(pwd)/occ-daily-volume/data:/app/data occ-daily-volume
 ```
 
-### Running with Docker
+## Development
 
-This project includes a `Dockerfile` to build and run the application in a containerized environment.
+### Testing
 
-1.  **Build the Docker image:**
-    ```bash
-    docker build -t occ-daily-volume .
-    ```
+Tests are located in `occ-daily-volume/tests/`.
 
-2.  **Run the Docker container:**
-    ```bash
-    docker run -v ./data:/app/data occ-daily-volume
-    ```
-    This command mounts the local `data` directory into the container, allowing the application to persist the SQLite database on the host machine.
+Run tests using `pytest`:
+```bash
+pytest occ-daily-volume/tests
+```
 
-The script uses the `volume-top-n.yaml` file for configuration, including the database path, data URL, and other parameters.
+### Conventions
 
-## Development Conventions
-
-- **Configuration**: Project configuration is managed through the `volume-top-n.yaml` file.
-- **Database**: The project uses a SQLite database to store the volume data. The database schema is managed by the `volume-top-n.py` script.
-- **Logging**: The project uses the standard Python `logging` module. The log level can be set via a command-line argument.
-- **Modularity**: The project is organized into a main script (`volume-top-n.py`) and a `common` module for shared functionality (database, logging, YAML parsing).
+-   **Style**: PEP 8.
+-   **Logging**: Standard `logging` library. Default level is `WARNING`, adjustable via `--log-level`.
+-   **Paths**: All paths in config should be relative to the script execution or absolute.
