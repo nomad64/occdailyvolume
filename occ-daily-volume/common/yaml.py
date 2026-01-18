@@ -14,10 +14,13 @@ def yaml_import_config(yaml_file):
     """
     logger = logging.getLogger(__name__)
     logger.debug(f"Loading YAML file: {yaml_file}")
+    yaml_conf = None
     try:
-        yaml_conf = yaml.full_load(open(yaml_file))
+        with open(yaml_file, 'r') as f:
+            yaml_conf = yaml.full_load(f)
     except FileNotFoundError:
         logger.exception(f"Unable to find config file: {yaml_file}")
+        raise
     return yaml_conf
 
 
